@@ -1,0 +1,8 @@
+
+
+Script to build a non-ancient compiler: https://bitbucket.org/jmesmon/vxworks-gcc-patches
+
+TODO:
+	- Network Proto
+	- FPGA access
+	- Use some vxworks functions
