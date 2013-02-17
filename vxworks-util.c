@@ -8,12 +8,12 @@
 #include <sysSymTbl.h>
 
 /* Based on documentation in vxworks-6.3/target/h/private/symbolP.h */
-static MODULE_ID symref_is_module_or_null(uint32_t symref)
+static MODULE_ID symref_is_module_or_null(intptr_t symref)
 {
 	switch (symref) {
-	case (uint32_t)SYMREF_SHELL:
-	case (uint32_t)SYMREF_KERNEL:
-	case (uint32_t)SYMREF_WTX:
+	case (intptr_t)SYMREF_SHELL:
+	case (intptr_t)SYMREF_KERNEL:
+	case (intptr_t)SYMREF_WTX:
 		return NULL;
 	default:
 		return (MODULE_ID)symref;
