@@ -15,10 +15,14 @@
 
 static void unload_old_module(void)
 {
+	/* FIXME: This code currently does what WPILib does, but it isn't clear
+	 *        why we should check that the task is running at all */
 	int32_t old_task_id = taskNameToId((char *)TASK_NAME);
 	if (old_task_id == ERROR)
 		return;
 
+	/* XXX: how do we avoid finding ourselves and ensure we find the old
+	 * module? */
 	MODULE_ID old_module_id = module_find_by_symbolname(STR(INIT_FUNC));
 	if (!old_module_id)
 		return;
