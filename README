@@ -9,4 +9,4 @@ TODO:
 
 Strip
 
-powerpc-wrs-vxworks-strip -K FRC_UserProgram_StartupLibraryInit FRC_UserProgram.out
+powerpc-wrs-vxworks-strip --strip-unneeded FRC_UserProgram.out
