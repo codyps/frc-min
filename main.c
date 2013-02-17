@@ -1,9 +1,41 @@
 #include <stdint.h>
 
-extern int32_t FRC_UserProgram_StartupLibraryInit(void);
+#include <taskLibCommon.h> /* taskNameToId() */
+#include <moduleLib.h> /* moduleFindByName(), MODULE_ID */
+#include <unldLib.h> /* unldByModuleId() */
+#include <limits.h> /* NAME_MAX */
+
+#include "vxworks-util.h"
+
+#define INIT_FUNC FRC_UserProgram_StartupLibraryInit
+#define TASK_NAME "FRC_RobotTask"
+
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+static void unload_old_module(void)
+{
+	int32_t old_task_id = taskNameToId((char *)TASK_NAME);
+	if (old_task_id == ERROR)
+		return;
+
+	MODULE_ID old_module_id = module_find_by_symbolname(STR(INIT_FUNC));
+	if (!old_module_id)
+		return;
+
+	unldByModuleId(old_module_id, 0);
+}
+
+
+extern int32_t INIT_FUNC(void);
 
 /* Called by the code that loads this module (FRC_UserProgram.out) */
-int32_t FRC_UserProgram_StartupLibraryInit(void)
+int32_t INIT_FUNC(void)
 {
+	unload_old_module();
+
+	/* TODO: establish net comms. */
+
+	/* TODO: spawn some task(s) */
 	return 0;
 }

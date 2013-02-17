@@ -6,3 +6,7 @@ TODO:
 	- Network Proto
 	- FPGA access
 	- Use some vxworks functions
+
+Strip
+
+powerpc-wrs-vxworks-strip -K FRC_UserProgram_StartupLibraryInit FRC_UserProgram.out
