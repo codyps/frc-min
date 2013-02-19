@@ -19,7 +19,7 @@ static void unload_old_module(void)
 	if (old_task_id == ERROR)
 		return;
 
-	MODULE_ID old_module_id = module_find_by_symbolname(STR(INIT_FUNC));
+	MODULE_ID old_module_id = module_find_earliest_by_symbolname(STR(INIT_FUNC));
 	if (!old_module_id)
 		return;
 

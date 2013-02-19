@@ -13,11 +13,13 @@
 #include <semLib.h>
 #include <hashLib.h>
 
+#define align_as(alignment) __attribute__((__aligned__(alignment)))
+#define alignof __alignof__
 #define container_of(item, type, member) \
-		((type *)((char *)(item) - offsetof(type, member)))
+		((type *)((char * align_as(alignof(type)))(item) - offsetof(type, member)))
 
 /* Based on documentation in vxworks-6.3/target/h/private/symbolP.h */
-static MODULE_ID symref_is_module_or_null(uintptr_t symref)
+static MODULE *symref_to_module_or_null(uintptr_t symref)
 {
 	switch (symref) {
 	case (uintptr_t)SYMREF_SHELL:
@@ -25,8 +27,13 @@ static MODULE_ID symref_is_module_or_null(uintptr_t symref)
 	case (uintptr_t)SYMREF_WTX:
 		return NULL;
 	default:
-		return (MODULE_ID)symref;
+		return (MODULE *)symref;
 	}
+}
+
+MODULE *symbol_to_module(SYMBOL *sym)
+{
+	return symref_to_module_or_null(sym->symRef);
 }
 
 static bool segment_contains_addr(SEGMENT_ID seg, void *addr)
@@ -88,7 +95,7 @@ MODULE *module_find_earliest_by_symbolname(const char *sym_name)
 	if (!sym)
 		return NULL;
 
-	return symref_is_module_or_null(sym->symRef);
+	return symbol_to_module(sym);
 }
 
 /* This uses symFindSymbol(), from vxworks-6.3/target/h/private/symLibP.h
@@ -100,6 +107,6 @@ MODULE *module_find_by_symbolname(const char *sym_name)
 	if (symFindSymbol(sysSymTbl, (char *)sym_name, 0, 0, 0, &sym) == ERROR)
 		return NULL;
 
-	return symref_is_module_or_null(sym->symRef);
+	return symbol_to_module(sym);
 }
 

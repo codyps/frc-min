@@ -10,6 +10,8 @@ MODULE *module_find_by_symbolname(const char *sym);
 SYMBOL *sym_find_earliest_by_name(const char *sym_name);
 MODULE *module_find_earliest_by_symbolname(const char *sym);
 
+MODULE *symbol_to_module(SYMBOL *sym);
+
 #define for_each_segment_in_module(segment_cursor, module)	\
 	for (segment_cursor = moduleSegFirst(module);		\
 	     segment_cursor;					\
