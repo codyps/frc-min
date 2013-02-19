@@ -13,8 +13,6 @@
 #include <semLib.h>
 #include <hashLib.h>
 
-#define align_as(alignment) __attribute__((__aligned__(alignment)))
-#define alignof __alignof__
 #define container_of(item, type, member) \
 		((type *)(void *)((char *)(item) - offsetof(type, member)))
 
