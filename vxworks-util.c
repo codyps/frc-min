@@ -16,7 +16,7 @@
 #define align_as(alignment) __attribute__((__aligned__(alignment)))
 #define alignof __alignof__
 #define container_of(item, type, member) \
-		((type *)((char * align_as(alignof(type)))(item) - offsetof(type, member)))
+		((type *)(void *)((char *)(item) - offsetof(type, member)))
 
 /* Based on documentation in vxworks-6.3/target/h/private/symbolP.h */
 static MODULE *symref_to_module_or_null(uintptr_t symref)
