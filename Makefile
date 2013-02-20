@@ -7,4 +7,4 @@ TARGETS = FRC_UserProgram.out
 
 include base.mk
 
-export WIND_BASE:=$(dir $(shell which $(CC)))../powerpc-wrx-vxworks/sys-include/
+export WIND_BASE:=/var/empty
