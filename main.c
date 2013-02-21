@@ -22,8 +22,11 @@ static void unload_old_module(void)
 		return;
 
 	/* XXX: how do we avoid finding ourselves and ensure we find the old
-	 * module? */
-	MODULE_ID old_module_id = module_find_by_symbolname(STR(INIT_FUNC));
+	 * module?
+	 *
+	 * - Right now we just find the oldest (earliest in the system)
+	 */
+	MODULE_ID old_module_id = module_find_earliest_by_symbolname(STR(INIT_FUNC));
 	if (!old_module_id)
 		return;
 
