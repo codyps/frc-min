@@ -60,8 +60,10 @@ static void call_dtors(void)
 
 void (*_ctors[])(void) = {
 	call_ctors,
+	NULL
 };
 
 void (*_dtors[])(void) = {
 	call_dtors,
+	NULL
 };

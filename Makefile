@@ -1,7 +1,7 @@
 all::
 CROSS_COMPILE=powerpc-wrs-vxworks-
 
-obj-FRC_UserProgram.out = main.o vxworks-util.o vxworks-no-munch.o
+obj-FRC_UserProgram.out = main.o vxworks-util.o vxworks-no-munch.o test_cxx.o
 
 TARGETS = FRC_UserProgram.out
 
