@@ -33,6 +33,18 @@ static void unload_old_module(void)
 	unldByModuleId(old_module_id, 0);
 }
 
+
+extern void _init(void);
+void _init(void)
+{
+}
+
+__attribute__((constructor))
+static void not_init(void);
+void not_init(void)
+{
+}
+
 extern int32_t INIT_FUNC(void);
 
 /* Called by the code that loads this module (FRC_UserProgram.out) */
