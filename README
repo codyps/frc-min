@@ -9,4 +9,5 @@ TODO:
 
 Strip
 
-powerpc-wrs-vxworks-strip --strip-unneeded FRC_UserProgram.out
+    # -G '' = Make all symbols "local" except the init func.
+    objcopy -G FRC_UserProgram_StartupLibraryInit --strip-unneeded FRC_UserProgram.out

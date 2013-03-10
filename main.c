@@ -7,7 +7,8 @@
 
 #include "vxworks-util.h"
 
-#define INIT_FUNC FRC_UserProgram_StartupLibraryInit
+/* INIT_FUNC is defined in 'Makefile'
+#define INIT_FUNC */
 #define TASK_NAME "FRC_RobotTask"
 
 #define _STR(x) #x

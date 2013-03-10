@@ -15,7 +15,7 @@ ENTRY(_start)
 SECTIONS
 {
 	.text : {
-		_VX_START_TEXT = .;
+		_VX_START_TEXT = .; /* from vxworks, not clear that it is used */
 
 		/* From builtin ld 2.23.1 */
 		*(.text.unlikely .text.*_unlikely)
@@ -28,8 +28,8 @@ SECTIONS
 
 		/* From vxworks */
 		KEEP(*(.init)) KEEP(*(.fini))
-		*(.glue_7t) *(.glue_7) *(.rdata)		/* for ARM */
-		*(.mips16.fn.*) *(.mips16.call.*) *(.reginfo)	/* for MIPS */
+		*(.glue_7t) *(.glue_7) *(.rdata)		/* "for ARM" */
+		*(.mips16.fn.*) *(.mips16.call.*) *(.reginfo)	/* "for MIPS" */
 		*(.rodata) *(.rodata.*) *(.rodata1)
 		*(.sdata2) *(.sbss2) /* "for PPC" (these seem very, very wrong) */
 	}
@@ -39,8 +39,9 @@ SECTIONS
 		/* {{{ binutils ld 2.23.1 */
 		*(.data .data.* .gnu.linkonce.d.*)
 		SORT(CONSTRUCTORS)
+		/* }}} (binutils ld 2.23.1) */
 
-		/* }}} {{{ my hacks for vxworks ctors/dtors */
+		/* {{{ my hacks for vxworks ctors/dtors */
 		_ctors = .;
 		/* initializer pointers */
 		/* XXX: use init_array stuff */
@@ -48,9 +49,9 @@ SECTIONS
 		_dtors = .;
 		/* destructor pointers */
 		.long 0
+		/* }}} */
 
-
-		/* }}} {{{ vxworks */
+		/* {{{ vxworks */
 		*(.data1)
 		*(.eh_frame) *(.gcc_except_table)
 		KEEP (*crtbegin.o(.ctors))
@@ -66,7 +67,7 @@ SECTIONS
 		*(.got.plt) *(.got) *(.dynamic)
 		*(.got2)
 		*(.sdata) *(.sdata.*) *(.lit8) *(.lit4)
-
+		/* }}} (vxworks) */
 	}
 
 	.bss : {
