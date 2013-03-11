@@ -11,7 +11,7 @@ TARGETS = $(BIN_NAME).elf
 
 $(BIN_NAME).out: $(BIN_NAME).elf
 	$(OBJCOPY) -G $(INIT_FUNC) --strip-unneeded $< $@
-TRASH+=$(BIN_NAME).out
+TRASH += $(BIN_NAME).out
 
 all:: $(BIN_NAME).out
 include base.mk
