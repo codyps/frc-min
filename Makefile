@@ -5,6 +5,7 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 BIN_NAME    = FRC_UserProgram
 INIT_FUNC   = $(BIN_NAME)_StartupLibraryInit
 ALL_CFLAGS += -DINIT_FUNC=$(INIT_FUNC)
+ALL_LDFLAGS += -Wl,-Ur -Tvxworks_elf.ld
 
 obj-$(BIN_NAME).elf = main.o vxworks-util.o vxworks-no-munch.o test_cxx.o
 TARGETS = $(BIN_NAME).elf

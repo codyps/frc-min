@@ -14,71 +14,84 @@ ENTRY(_start)
 /* PROVIDE (__stack = 0); PROVIDE (___stack = 0); */
 SECTIONS
 {
-	.text : {
-		_VX_START_TEXT = .; /* from vxworks, not clear that it is used */
+  .text : {
+    _VX_START_TEXT = .; /* from vxworks, not clear that it is used */
 
-		/* From builtin ld 2.23.1 */
-		*(.text.unlikely .text.*_unlikely)
-		*(.text.exit .text.exit.*)
-		*(.text.startup .text.startup.*)
-		*(.text.hot .text.hot.*)
-		*(.text .stub .text.* .gnu.linkonce.t.*)
-		/* .gnu.warning sections are handled specially by elf32.em.  */
-		*(.gnu.warning)
+    /* From builtin ld 2.23.1 */
+    *(.text.unlikely .text.*_unlikely)
+    *(.text.exit .text.exit.*)
+    *(.text.startup .text.startup.*)
+    *(.text.hot .text.hot.*)
+    *(.text .stub .text.* .gnu.linkonce.t.*)
+    /* .gnu.warning sections are handled specially by elf32.em.  */
+    *(.gnu.warning)
 
-		/* From vxworks */
-		KEEP(*(.init)) KEEP(*(.fini))
-		*(.glue_7t) *(.glue_7) *(.rdata)		/* "for ARM" */
-		*(.mips16.fn.*) *(.mips16.call.*) *(.reginfo)	/* "for MIPS" */
-		*(.rodata) *(.rodata.*) *(.rodata1)
-		*(.sdata2) *(.sbss2) /* "for PPC" (these seem very, very wrong) */
-	}
+    /* From vxworks */
+    KEEP(*(.init)) KEEP(*(.fini))
+    *(.glue_7t) *(.glue_7) *(.rdata)		/* "for ARM" */
+    *(.mips16.fn.*) *(.mips16.call.*) *(.reginfo)	/* "for MIPS" */
+    *(.rodata) *(.rodata.*) *(.rodata1)
+    *(.sdata2) *(.sbss2) /* "for PPC" (these seem very, very wrong) */
+  }
 
-	.data : {
-		_VX_START_DATA = .;
-		/* {{{ binutils ld 2.23.1 */
-		*(.data .data.* .gnu.linkonce.d.*)
-		SORT(CONSTRUCTORS)
-		/* }}} (binutils ld 2.23.1) */
+  .data : {
+    _VX_START_DATA = .;
+    /* {{{ binutils ld 2.23.1 */
+    *(.data .data.* .gnu.linkonce.d.*)
+    SORT(CONSTRUCTORS)
+    /* }}} (binutils ld 2.23.1) */
 
-		/* {{{ my hacks for vxworks ctors/dtors */
-		_ctors = .;
-		/* initializer pointers */
-		/* XXX: use init_array stuff */
-		.long 0
-		_dtors = .;
-		/* destructor pointers */
-		.long 0
-		/* }}} */
+    /* {{{ vxworks _ctors/_dtors using init_array. */
+    _ctors = .;
+    /* initializer pointers */
+    /* XXX: ordering */
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP (*(.preinit_array))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array))
+    PROVIDE_HIDDEN (__init_array_end = .);
+    LONG(0) /* terminator */
+    _dtors = .;
+    /* destructor pointers */
+    /* XXX: ordering */
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP (*(SORT(.fini_array.*)))
+    KEEP (*(.fini_array))
+    PROVIDE_HIDDEN (__fini_array_end = .);
+    LONG(0) /* terminator */
+    /* }}} */
 
-		/* {{{ vxworks */
-		*(.data1)
-		*(.eh_frame) *(.gcc_except_table)
-		KEEP (*crtbegin.o(.ctors))
-		KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-		KEEP (*(SORT(.ctors.*)))
-		KEEP (*(.ctors))
-		KEEP (*crtbegin.o(.dtors))
-		KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
-		KEEP (*(SORT(.dtors.*)))
-		KEEP (*(.dtors))
+    /* {{{ vxworks */
+      *(.data1)
+      *(.eh_frame) *(.gcc_except_table)
+      /* KEEP (*crtbegin.o(.ctors))
+      KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+      KEEP (*(SORT(.ctors.*)))
+      KEEP (*(.ctors))
+      KEEP (*crtbegin.o(.dtors))
+      KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+      KEEP (*(SORT(.dtors.*)))
+      KEEP (*(.dtors))
+       */
 
-		/* got*, dynamic, sdata*, lit[48], and sbss should follow _gp */
-		*(.got.plt) *(.got) *(.dynamic)
-		*(.got2)
-		*(.sdata) *(.sdata.*) *(.lit8) *(.lit4)
-		/* }}} (vxworks) */
-	}
+/* "got*, dynamic, sdata*, lit[48], and sbss should follow _gp" */
+      *(.got.plt) *(.got) *(.dynamic)
+      *(.got2)
+      *(.sdata) *(.sdata.*) *(.lit8) *(.lit4)
+      /* }}} (vxworks) */
+    }
 
-	.bss : {
-		/* builtin ld 2.23.1 */
-		*(.dynbss)
-		*(.bss .bss.* .gnu.linkonce.b.*)
-		*(COMMON)
+    .bss : {
+      /* builtin ld 2.23.1 */
+      *(.dynbss)
+      *(.bss .bss.* .gnu.linkonce.b.*)
+      *(COMMON)
 
-		/* vxworks */
-		*(.sbss) *(.scommon)
-	}
+      /* vxworks */
+      *(.sbss) *(.scommon)
+    }
 
 
   /* Read-only sections, merged into text segment: */
@@ -92,6 +105,7 @@ SECTIONS
   .gnu.version    : { *(.gnu.version) }
   .gnu.version_d  : { *(.gnu.version_d) }
   .gnu.version_r  : { *(.gnu.version_r) }
+  /*
   .rela.dyn       :
     {
       *(.rela.init)
@@ -121,6 +135,7 @@ SECTIONS
     {
       *(.rela.plt)
     }
+      */
   .init           :
   {
     _init = .;
@@ -182,6 +197,7 @@ SECTIONS
   /* Thread Local Storage sections  */
   .tdata	  : { *(.tdata .tdata.* .gnu.linkonce.td.*) }
   .tbss		  : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) }
+  /*
   .preinit_array     :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
@@ -202,8 +218,11 @@ SECTIONS
     KEEP (*(.fini_array))
     PROVIDE_HIDDEN (__fini_array_end = .);
   }
+  */
+  /*
   .ctors          :
   {
+  */
     /* gcc uses crtbegin.o to find the start of
        the constructors, so we make sure it is
        first.  Because this is a wildcard, it
@@ -213,12 +232,15 @@ SECTIONS
        wildcard.  The wildcard also means that it
        doesn't matter which directory crtbegin.o
        is in.  */
+/*
     KEEP (*crtbegin.o(.ctors))
     KEEP (*crtbegin?.o(.ctors))
+    */
     /* We don't want to include the .ctor section from
        the crtend.o file until after the sorted ctors.
        The .ctor section from the crtend file contains the
        end of ctors marker and it must be last */
+/*
     KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .ctors))
     KEEP (*(SORT(.ctors.*)))
     KEEP (*(.ctors))
@@ -231,6 +253,7 @@ SECTIONS
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors))
   }
+    */
   .jcr            : { KEEP (*(.jcr)) }
   .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }
   .fixup          : { *(.fixup) }

@@ -1,3 +1,4 @@
+## base.mk: a8cc50d+, see https://github.com/jmesmon/trifles.git
 # Usage:
 #
 # == For use by the one who runs 'make' ==
