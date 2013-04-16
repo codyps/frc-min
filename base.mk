@@ -1,4 +1,4 @@
-## base.mk: a8cc50d+, see https://github.com/jmesmon/trifles.git
+## base.mk: f65566f, see https://github.com/jmesmon/trifles.git
 # Usage:
 #
 # == For use by the one who runs 'make' ==
@@ -36,12 +36,7 @@
 .SUFFIXES:
 
 O = .
-T = $(addprefix $(O)/,$(TARGETS))
-#VPATH = $(O):.
-vpath %.c .
-vpath %.o $(O)
-vpath .TRACK-CFLAGS $(O)
-vpath .TRACK-LDFLAGS $(O)
+#VPATH = $(O)
 $(foreach target,$(TARGETS),$(eval vpath $(target) $(O)))
 
 .PHONY: all FORCE
@@ -73,8 +68,9 @@ COMMON_CFLAGS += -Wundef -Wshadow
 COMMON_CFLAGS += -pipe
 COMMON_CFLAGS += -Wcast-align
 COMMON_CFLAGS += -Wwrite-strings
-COMMON_CFLAGS += -Wunsafe-loop-optimizations
-COMMON_CFLAGS += -Wnormalized=id
+
+# -Wnormalized=id		not supported by clang
+# -Wunsafe-loop-optimizations	not supported by clang
 
 ALL_CFLAGS += -std=gnu99
 ALL_CFLAGS += -Wbad-function-cast
@@ -105,6 +101,7 @@ target-obj = $(addprefix $(O)/,$(obj-$(1)))
 # Defines a target '.TRACK-$(flag-prefix)FLAGS'.
 # if $(ALL_$(flag-prefix)FLAGS) or $(var) changes, any rules depending on this
 # target are rebuilt.
+vpath .TRACK_%FLAGS $(O)
 define flags-template
 TRACK_$(1)FLAGS = $$($(2)):$$(subst ','\'',$$(ALL_$(1)FLAGS))
 $(O)/.TRACK-$(1)FLAGS: FORCE
@@ -120,15 +117,20 @@ $(eval $(call flags-template,C,CC,c build flags))
 $(eval $(call flags-template,CXX,CXX,c++ build flags))
 $(eval $(call flags-template,LD,LD,link flags))
 
+obj-cflags = CFLAGS_$(1)
+
 $(O)/%.o: %.c .TRACK-CFLAGS
-	$(QUIET_CC)$(CC)   -MMD -MF "$(call obj-to-dep,$@)" -c -o "$@" "$<" $(ALL_CFLAGS)
+	$(QUIET_CC)$(CC)   -MMD -MF $(call obj-to-dep,$@) -c -o $@ $< $(ALL_CFLAGS)
 
 $(O)/%.o: %.cc .TRACK-CXXFLAGS
-	$(QUIET_CXX)$(CXX) -MMD -MF "$(call obj-to-dep,$@)" -c -o "$@" "$<" $(ALL_CXXFLAGS)
+	$(QUIET_CXX)$(CXX) -MMD -MF $(call obj-to-dep,$@) -c -o $@ $< $(call obj-clfags,$*) $(ALL_CXXFLAGS)
 
-.SECONDEXPANSION:
-$(addprefix $(O)/,$(TARGETS)) : .TRACK-LDFLAGS $$(obj-$$(notdir $$@))
-	$(QUIET_LINK)$(LD) -o $@ $(call target-obj,$@) $(ALL_LDFLAGS)
+define BIN-LINK
+$(1)/$(2) : .TRACK-LDFLAGS $(obj-$(2))
+	$$(QUIET_LINK)$(LD) -o $$@ $(call target-obj,$(2)) $(ALL_LDFLAGS) $(ldflags-$(2))
+endef
+
+$(foreach target,$(TARGETS),$(eval $(call BIN-LINK,$(O),$(target))))
 
 ifndef NO_INSTALL
 PREFIX  ?= $(HOME)   # link against things here
@@ -145,6 +147,23 @@ endif
 	$(RM) $(call target-obj,$*) $(O)/$* $(TRASH) $(call target-dep,$*)
 
 clean:	$(addsuffix .clean,$(TARGETS))
+
+.PHONY: watch
+watch:
+	@while true; do \
+		make -rR --no-print-directory; \
+		inotifywait -q \
+		  \
+		 -- $$(find . \
+		        -name '*.c' \
+			-or -name '*.h' \
+			-or -name 'Makefile' \
+			-or -name '*.mk' ); \
+		echo "Rebuilding..."
+	done
+
+show-targets:
+	@echo $(TARGETS)
 
 deps = $(foreach target,$(TARGETS),$(call target-dep,$(target)))
 -include $(deps)

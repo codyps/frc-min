@@ -1,3 +1,4 @@
 .TRACK-*
 *.out
+*.elf
 *.[od]
